@@ -1,0 +1,602 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Listado Ventas Marcimex</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --primary:#1F4E79;--pl:#2E75B6;--accent:#E8F4FD;
+    --man:#2E75B6;--emp:#C0392B;--mej:#27AE60;
+    --bg:#F0F4F8;--card:#fff;--bdr:#D1DCE8;--txt:#1a2a3a;--mut:#6b7c93;
+    --rad:10px;--shd:0 2px 12px rgba(31,78,121,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+  header{background:linear-gradient(135deg,var(--primary),var(--pl));color:#fff;padding:18px 32px;display:flex;align-items:center;gap:16px;box-shadow:0 3px 12px rgba(0,0,0,.2);}
+  header .logo{width:44px;height:44px;background:#fff2;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;}
+  header h1{font-size:1.25rem;font-weight:700;}
+  header p{font-size:.8rem;opacity:.85;margin-top:2px;}
+  main{max-width:1400px;margin:28px auto;padding:0 20px;display:flex;flex-direction:column;gap:22px;}
+  .card{background:var(--card);border-radius:var(--rad);box-shadow:var(--shd);padding:24px;}
+  .card-title{font-size:.95rem;font-weight:700;color:var(--primary);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .card-title::before{content:'';width:4px;height:18px;background:var(--primary);border-radius:2px;display:inline-block;}
+  /* Upload */
+  #dropzone{border:2.5px dashed var(--pl);border-radius:var(--rad);padding:36px 20px;text-align:center;cursor:pointer;transition:.2s;background:var(--accent);}
+  #dropzone:hover,#dropzone.drag{border-color:var(--primary);background:#d4eaf8;}
+  #dropzone .icon{font-size:2.5rem;margin-bottom:10px;}
+  #dropzone p{color:var(--mut);font-size:.9rem;}
+  #dropzone strong{color:var(--primary);font-size:1rem;}
+  #fileInput{display:none;}
+  /* Filters */
+  .filters-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .filters-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:20px;}
+  @media(max-width:900px){.filters-grid-4{grid-template-columns:1fr 1fr;}}
+  @media(max-width:600px){.filters-grid{grid-template-columns:1fr;}.filters-grid-4{grid-template-columns:1fr;}}
+  .filter-block{background:#f7fafc;border:1px solid var(--bdr);border-radius:8px;padding:14px;}
+  .filter-label{font-size:.76rem;font-weight:700;color:var(--primary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .lnk{font-size:.68rem;font-weight:400;color:var(--pl);cursor:pointer;text-decoration:underline;text-transform:none;letter-spacing:0;}
+  /* Checklist */
+  .chk-list{max-height:180px;overflow-y:auto;border:1px solid var(--bdr);border-radius:6px;background:#fff;padding:4px 0;}
+  .chk-search{width:100%;border:1px solid var(--bdr);border-radius:5px;padding:5px 8px;font-size:.78rem;margin-bottom:6px;outline:none;}
+  .chk-search:focus{border-color:var(--pl);}
+  .chk-item{display:flex;align-items:center;gap:6px;padding:3px 8px;cursor:pointer;font-size:.79rem;transition:.1s;}
+  .chk-item:hover{background:#e8f4fd;}
+  .chk-item input{accent-color:var(--primary);cursor:pointer;width:13px;height:13px;flex-shrink:0;}
+  .chk-sa{border-bottom:1px solid #e2e8f0;font-weight:600;color:var(--primary);}
+  /* Date tree */
+  .tree-search{width:100%;border:1px solid var(--bdr);border-radius:5px;padding:5px 8px;font-size:.78rem;margin-bottom:6px;outline:none;}
+  .tree-search:focus{border-color:var(--pl);}
+  .date-tree{max-height:220px;overflow-y:auto;border:1px solid var(--bdr);border-radius:6px;background:#fff;padding:4px 0;}
+  .tree-row{display:flex;align-items:center;padding:2px 6px;user-select:none;}
+  .tree-row:hover{background:#e8f4fd;}
+  .tog{width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #aac4de;background:#e8f4fd;border-radius:2px;font-size:.55rem;font-weight:900;color:var(--primary);cursor:pointer;flex-shrink:0;margin-right:4px;}
+  .tog.sp{border:none;background:none;}
+  .i1{padding-left:20px;} .i2{padding-left:40px;}
+  .tcb{accent-color:var(--primary);cursor:pointer;margin-right:5px;width:12px;height:12px;flex-shrink:0;}
+  .tlbl{cursor:pointer;font-size:.79rem;}
+  .lbl-y{font-weight:700;color:var(--primary);}
+  .lbl-m{font-weight:600;color:#2c5282;}
+  .lbl-d{color:#374151;}
+  .sa-row{display:flex;align-items:center;gap:5px;padding:3px 8px;border-bottom:1px solid #e2e8f0;margin-bottom:2px;}
+  .sa-row label{font-size:.79rem;font-weight:600;color:var(--primary);cursor:pointer;}
+  /* KPIs */
+  .kpis{display:flex;gap:12px;flex-wrap:wrap;}
+  .kpi{flex:1;min-width:130px;border-radius:8px;padding:14px 18px;color:#fff;text-align:center;}
+  .kpi.tot{background:var(--primary);} .kpi.man{background:var(--man);} .kpi.emp{background:var(--emp);} .kpi.mej{background:var(--mej);}
+  .kpi .num{font-size:1.7rem;font-weight:800;} .kpi .lbl{font-size:.72rem;opacity:.9;margin-top:2px;}
+  /* Buttons */
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border:none;border-radius:8px;font-size:.9rem;font-weight:700;cursor:pointer;transition:.2s;}
+  .btn-p{background:var(--primary);color:#fff;} .btn-p:hover{background:var(--pl);} .btn-p:disabled{opacity:.5;cursor:not-allowed;}
+  .btn-s{background:#27AE60;color:#fff;} .btn-s:hover{background:#219653;}
+  .btn-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+  /* Progress */
+  #progressWrap{display:none;}
+  .pb-bg{background:#e2e8f0;border-radius:99px;height:10px;overflow:hidden;margin-top:8px;}
+  .pb{height:100%;background:linear-gradient(90deg,var(--primary),var(--pl));border-radius:99px;width:0%;transition:width .3s;}
+  #statusMsg{font-size:.82rem;color:var(--mut);margin-top:6px;}
+  /* Table */
+  .tbl-wrap{overflow-x:auto;max-height:420px;border-radius:8px;border:1px solid var(--bdr);}
+  table{border-collapse:collapse;width:100%;font-size:.77rem;}
+  thead th{background:var(--primary);color:#fff;padding:7px 9px;text-align:left;white-space:nowrap;position:sticky;top:0;z-index:2;}
+  tbody tr:nth-child(even){background:#f7fafd;}
+  tbody td{padding:5px 9px;border-bottom:1px solid #edf2f7;white-space:nowrap;}
+  .rm{background:#d6e4f0!important;} .re{background:#fadadd!important;} .rj{background:#d5f5e3!important;}
+  .badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.69rem;font-weight:700;color:#fff;}
+  .bM{background:var(--man);} .bE{background:var(--emp);} .bJ{background:var(--mej);} .bS{background:#999;}
+  /* Divider */
+  .sec-div{border-top:1px solid var(--bdr);margin:18px 0 14px;padding-top:14px;font-size:.78rem;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">📊</div>
+  <div>
+    <h1>Listado Ventas Marcimex</h1>
+    <p>Carga tu archivo Excel · Aplica filtros · Descarga el resultado</p>
+  </div>
+</header>
+<main>
+
+  <!-- 1. UPLOAD -->
+  <div class="card">
+    <div class="card-title">1 · Subir Archivo Excel</div>
+    <div id="dropzone" onclick="document.getElementById('fileInput').click()"
+         ondragover="ev(event,'drag')" ondragleave="ev(event,'')" ondrop="drop(event)">
+      <div class="icon">📂</div>
+      <strong id="fileName">Arrastra tu archivo aquí o haz clic para seleccionar</strong>
+      <p style="margin-top:6px;">Formatos soportados: .xlsx · .xls</p>
+    </div>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="loadFile(this.files[0])"/>
+  </div>
+
+  <!-- 2. FILTERS -->
+  <div class="card" id="filtersCard" style="display:none">
+    <div class="card-title">2 · Filtros</div>
+
+    <!-- Fechas -->
+    <div class="filters-grid">
+      <div class="filter-block">
+        <div class="filter-label">📅 Fecha Vencimiento Inicial
+          <span class="lnk" onclick="selectAllTree('ini',true)">Todo</span>
+          <span class="lnk" onclick="selectAllTree('ini',false)">Ninguno</span>
+        </div>
+        <input class="tree-search" type="text" placeholder="🔍 Buscar…" oninput="filterTree('ini',this.value)"/>
+        <div class="date-tree" id="treeIni"></div>
+      </div>
+      <div class="filter-block">
+        <div class="filter-label">📅 Fecha Vencimiento Final
+          <span class="lnk" onclick="selectAllTree('fin',true)">Todo</span>
+          <span class="lnk" onclick="selectAllTree('fin',false)">Ninguno</span>
+        </div>
+        <input class="tree-search" type="text" placeholder="🔍 Buscar…" oninput="filterTree('fin',this.value)"/>
+        <div class="date-tree" id="treeFin"></div>
+      </div>
+    </div>
+
+    <!-- Origen + 4 nuevos filtros -->
+    <div class="filters-grid-4" style="margin-top:16px;">
+
+      <div class="filter-block">
+        <div class="filter-label">🏷️ Origen Factura
+          <span class="lnk" onclick="saChk('origen',true)">Todo</span>
+          <span class="lnk" onclick="saChk('origen',false)">Ninguno</span>
+        </div>
+        <input class="chk-search" placeholder="🔍 Buscar…" oninput="searchChk('origen',this.value)"/>
+        <div class="chk-list" id="chk-origen"></div>
+      </div>
+
+      <div class="filter-block">
+        <div class="filter-label">🏪 Tienda Factura
+          <span class="lnk" onclick="saChk('tifac',true)">Todo</span>
+          <span class="lnk" onclick="saChk('tifac',false)">Ninguno</span>
+        </div>
+        <input class="chk-search" placeholder="🔍 Buscar…" oninput="searchChk('tifac',this.value)"/>
+        <div class="chk-list" id="chk-tifac"></div>
+      </div>
+
+      <div class="filter-block">
+        <div class="filter-label">🏬 Tienda Cupo
+          <span class="lnk" onclick="saChk('ticupo',true)">Todo</span>
+          <span class="lnk" onclick="saChk('ticupo',false)">Ninguno</span>
+        </div>
+        <input class="chk-search" placeholder="🔍 Buscar…" oninput="searchChk('ticupo',this.value)"/>
+        <div class="chk-list" id="chk-ticupo"></div>
+      </div>
+
+      <div class="filter-block">
+        <div class="filter-label">🔢 Nro Vencimiento Final
+          <span class="lnk" onclick="saChk('nrovenc',true)">Todo</span>
+          <span class="lnk" onclick="saChk('nrovenc',false)">Ninguno</span>
+        </div>
+        <input class="chk-search" placeholder="🔍 Buscar…" oninput="searchChk('nrovenc',this.value)"/>
+        <div class="chk-list" id="chk-nrovenc"></div>
+      </div>
+
+      <div class="filter-block" style="grid-column:1/-1">
+        <div class="filter-label">📦 Línea Producto
+          <span class="lnk" onclick="saChk('linea',true)">Todo</span>
+          <span class="lnk" onclick="saChk('linea',false)">Ninguno</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;" id="chk-linea"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 3. PROCESS -->
+  <div class="card" id="processCard" style="display:none">
+    <div class="card-title">3 · Procesar y Descargar</div>
+    <div class="btn-row">
+      <button class="btn btn-p" id="btnProcess" onclick="processData()">⚙️ Procesar Datos</button>
+      <button class="btn btn-s" id="btnDownload" style="display:none" onclick="downloadExcel()">⬇️ Descargar Excel</button>
+    </div>
+    <div id="progressWrap" style="margin-top:14px;">
+      <div class="pb-bg"><div class="pb" id="progBar"></div></div>
+      <div id="statusMsg"></div>
+    </div>
+    <div class="kpis" id="kpiRow" style="display:none;margin-top:18px;">
+      <div class="kpi tot"><div class="num" id="kTotal">0</div><div class="lbl">Registros Totales</div></div>
+      <div class="kpi man"><div class="num" id="kMan">0</div><div class="lbl">Mantiene</div></div>
+      <div class="kpi emp"><div class="num" id="kEmp">0</div><div class="lbl">Empeora</div></div>
+      <div class="kpi mej"><div class="num" id="kMej">0</div><div class="lbl">Mejora</div></div>
+    </div>
+    <div id="tableWrap" style="display:none;margin-top:18px;">
+      <div style="font-size:.8rem;color:var(--mut);margin-bottom:8px;">Vista previa · primeros 50 registros</div>
+      <div class="tbl-wrap"><table id="prevTable"><thead></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+
+</main>
+<script>
+// ── CONSTANTS ─────────────────────────────────────────────────────────────────
+const MANTIENE=new Set(['A.A','B.B','C.C','D.D','E.E','E1.E1']);
+const EMPEORA =new Set(['AA.A','A.B','B.C','C.D','D.E','E.E1','E1.E2']);
+const MEJORA  =new Set(['AA.AA','A.AA','B.AA','B.A','C.AA','C.A','C.B','D.AA','D.A','D.B','D.C',
+  'E.AA','E.A','E.B','E.C','E.D','E1.AA','E1.A','E1.B','E1.C','E1.D','E1.E']);
+const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto',
+             'septiembre','octubre','noviembre','diciembre'];
+
+// Output columns in required order (NO Cod Cliente) — un registro por venta/factura
+const OUT_COLS=[
+  'Nombre del Cliente','Número de Identificación','Dirección Principal','Teléfono Celular',
+  'Zona del Cliente Final','Nombre del Cobrador Actual',
+  'Calificación Cliente Mensual','Calificación Cliente Diaria',
+  'Fecha de Vencimiento Final','Número de Vencimiento','Producto','Vendedor',
+  'Saldo Cuota','Saldo Crédito Final','Valor Cuota',
+  'Calificación Concatenada','Categoría del Cliente'
+];
+
+let rawData=[],processedData=[],treeMap={};
+
+// ── DRAG DROP ─────────────────────────────────────────────────────────────────
+function ev(e,c){e.preventDefault();document.getElementById('dropzone').className=c;}
+function drop(e){e.preventDefault();ev(e,'');const f=e.dataTransfer.files[0];if(f)loadFile(f);}
+
+// ── DATE UTILS ────────────────────────────────────────────────────────────────
+function parseDate(v){
+  if(v===null||v===undefined||v==='')return null;
+  if(v instanceof Date)return isNaN(v)?null:v;
+  if(typeof v==='number'){const u=(v-25569)*86400000;const d=new Date(u);return isNaN(d)?null:d;}
+  const d=new Date(v);return isNaN(d)?null:d;
+}
+function toYMD(d){
+  if(!d)return null;
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+}
+function toDMY(d){
+  if(!d)return '';
+  return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`;
+}
+
+// ── LOAD FILE ─────────────────────────────────────────────────────────────────
+function loadFile(file){
+  if(!file)return;
+  document.getElementById('fileName').textContent='⏳ Cargando '+file.name+'…';
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const wb=XLSX.read(e.target.result,{type:'array',cellDates:false,raw:false});
+    // Also read with cellDates for proper date parsing
+    const wb2=XLSX.read(e.target.result,{type:'array',cellDates:true,raw:false});
+    const rawD=XLSX.utils.sheet_to_json(wb2.Sheets[wb2.SheetNames[0]],{defval:null});
+    // Merge: use rawD for dates, wb for numbers
+    const rawN=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:null});
+    rawData=rawD.map((r,i)=>{const n=rawN[i]||{};return Object.assign({},r,{'Nro Vencimiento Final':n['Nro Vencimiento Final'],'Plazo Crédito':n['Plazo Crédito'],'Saldo Cuota':n['Saldo Cuota'],'Saldo Crédito Final':n['Saldo Crédito Final'],'Valor Cuota':n['Valor Cuota']});});
+    document.getElementById('fileName').textContent='✅ '+file.name+' · '+rawData.length.toLocaleString()+' filas';
+    buildFilters();
+    ['filtersCard','processCard'].forEach(id=>document.getElementById(id).style.display='');
+    document.getElementById('btnDownload').style.display='none';
+    document.getElementById('kpiRow').style.display='none';
+    document.getElementById('tableWrap').style.display='none';
+    processedData=[];
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── BUILD FILTERS ─────────────────────────────────────────────────────────────
+function buildFilters(){
+  const sets={ini:new Set(),fin:new Set(),origen:new Set(),tifac:new Set(),ticupo:new Set(),nrovenc:new Set(),linea:new Set()};
+  rawData.forEach(r=>{
+    const i=toYMD(parseDate(r['Fecha Vencimiento Inicial']));if(i)sets.ini.add(i);
+    const f=toYMD(parseDate(r['Fecha Vencimiento Final']));if(f)sets.fin.add(f);
+    if(r['Origen Factura'])sets.origen.add(r['Origen Factura'].toString().trim());else sets.origen.add('(Sin Origen)');
+    if(r['Tienda Factura'])sets.tifac.add(r['Tienda Factura'].toString().trim());
+    if(r['Tienda Cupo'])sets.ticupo.add(r['Tienda Cupo'].toString().trim());
+    const nv=r['Nro Vencimiento Final'];
+    if(nv!==null&&nv!==undefined&&nv!==''){const p=Math.round(Number(nv));if(!isNaN(p))sets.nrovenc.add(String(p));}
+    if(r['Línea Producto'])sets.linea.add(r['Línea Producto'].toString().trim());
+  });
+  // Date trees
+  treeMap.ini=buildDateMap(sets.ini); renderTree('ini');
+  treeMap.fin=buildDateMap(sets.fin); renderTree('fin');
+  // Checklists
+  buildChk('origen',[...sets.origen].sort());
+  buildChk('tifac',[...sets.tifac].sort());
+  buildChk('ticupo',[...sets.ticupo].sort());
+  buildChk('nrovenc',[...sets.nrovenc].sort((a,b)=>+a-+b));
+  buildLineaChk([...sets.linea].sort());
+}
+
+// ── CHECKLIST BUILDER ─────────────────────────────────────────────────────────
+function buildChk(key,vals){
+  const wrap=document.getElementById('chk-'+key);wrap.innerHTML='';
+  // Select all row
+  const saDiv=document.createElement('div');saDiv.className='chk-item chk-sa';
+  const saCb=document.createElement('input');saCb.type='checkbox';saCb.checked=true;saCb.id='sa-'+key;
+  saCb.onchange=()=>saChk(key,saCb.checked);
+  const saLbl=document.createElement('label');saLbl.htmlFor='sa-'+key;saLbl.textContent='(Seleccionar todo)';saLbl.style.cursor='pointer';
+  saDiv.append(saCb,saLbl);wrap.appendChild(saDiv);
+  vals.forEach(v=>{
+    const div=document.createElement('div');div.className='chk-item';div.dataset.val=v.toLowerCase();
+    const cb=document.createElement('input');cb.type='checkbox';cb.checked=true;cb.className='chk-'+key;cb.value=v;cb.id=`chk-${key}-${v}`;
+    cb.onchange=()=>updateSaChk(key);
+    const lbl=document.createElement('label');lbl.htmlFor=`chk-${key}-${v}`;lbl.textContent=v;lbl.style.cursor='pointer';
+    div.append(cb,lbl);wrap.appendChild(div);
+  });
+}
+function buildLineaChk(vals){
+  const wrap=document.getElementById('chk-linea');wrap.innerHTML='';
+  vals.forEach(v=>{
+    const lbl=document.createElement('label');
+    lbl.style.cssText='display:flex;align-items:center;gap:5px;font-size:.79rem;cursor:pointer;background:#e8f4fd;border-radius:5px;padding:4px 8px;';
+    const cb=document.createElement('input');cb.type='checkbox';cb.checked=true;cb.className='chk-linea';cb.value=v;
+    cb.style.accentColor='var(--primary)';
+    lbl.append(cb,v);wrap.appendChild(lbl);
+  });
+}
+function saChk(key,val){
+  document.querySelectorAll('.chk-'+key).forEach(c=>c.checked=val);
+  const sa=document.getElementById('sa-'+key);if(sa)sa.checked=val;
+}
+function updateSaChk(key){
+  const all=[...document.querySelectorAll('.chk-'+key)];
+  const sa=document.getElementById('sa-'+key);
+  if(sa)sa.checked=all.every(c=>c.checked);
+}
+function searchChk(key,q){
+  q=q.trim().toLowerCase();
+  document.querySelectorAll(`#chk-${key} .chk-item:not(.chk-sa)`).forEach(div=>{
+    div.style.display=(!q||div.dataset.val.includes(q))?'':'none';
+  });
+}
+
+// ── DATE TREE ─────────────────────────────────────────────────────────────────
+function buildDateMap(dateSet){
+  const map={};
+  for(const ds of dateSet){const[y,m,d]=ds.split('-');if(!map[y])map[y]={};if(!map[y][m])map[y][m]=new Set();map[y][m].add(d);}
+  return map;
+}
+function renderTree(prefix){
+  const wrap=document.getElementById('tree'+prefix.charAt(0).toUpperCase()+prefix.slice(1));
+  wrap.innerHTML='';const map=treeMap[prefix];
+  if(!map||!Object.keys(map).length){wrap.innerHTML='<div style="padding:10px;color:var(--mut);font-size:.78rem;">Sin datos</div>';return;}
+  // Select all
+  const saR=document.createElement('div');saR.className='sa-row';
+  const saCb=mkCb(`${prefix}_all`,`${prefix}_all`,true,()=>selectAllTree(prefix,saCb.checked));
+  const saL=document.createElement('label');saL.htmlFor=`${prefix}_all`;saL.textContent='(Seleccionar todo)';saL.style.cursor='pointer';
+  saR.append(saCb,saL);wrap.appendChild(saR);
+  for(const y of Object.keys(map).sort((a,b)=>b-a)){
+    wrap.appendChild(mkTreeRow('',`ttog-y-${prefix}-${y}`,'y',prefix,y,null,map));
+    const mW=document.createElement('div');mW.id=`mw-${prefix}-${y}`;mW.style.display='none';wrap.appendChild(mW);
+    for(const m of Object.keys(map[y]).sort((a,b)=>b-a)){
+      mW.appendChild(mkTreeRow('i1',`ttog-m-${prefix}-${y}-${m}`,'m',prefix,y,m,map));
+      const dW=document.createElement('div');dW.id=`dw-${prefix}-${y}-${m}`;dW.style.display='none';mW.appendChild(dW);
+      for(const d of [...map[y][m]].sort((a,b)=>+a-+b)){
+        const dR=document.createElement('div');dR.className='tree-row i2';
+        const sp=document.createElement('span');sp.className='tog sp';
+        const dCb=mkCb(`${prefix}_d_${y}_${m}_${d}`,`${prefix}_day`,true,()=>onDayChange(prefix,y,m));
+        dCb.dataset.year=y;dCb.dataset.month=m;dCb.dataset.day=d;dCb.dataset.date=`${y}-${m}-${d}`;
+        const dL=document.createElement('label');dL.htmlFor=dCb.id;dL.className='tlbl lbl-d';dL.textContent=d;
+        dR.append(sp,dCb,dL);dW.appendChild(dR);
+      }
+    }
+  }
+}
+function mkCb(id,cls,chk,onChange){
+  const cb=document.createElement('input');cb.type='checkbox';cb.id=id;cb.className='tcb '+cls;cb.checked=chk;cb.onchange=onChange;return cb;
+}
+function mkTreeRow(indent,togId,type,prefix,year,month){
+  const row=document.createElement('div');row.className='tree-row '+(indent||'');
+  const tog=document.createElement('span');tog.className='tog';tog.textContent='+';tog.id=togId;
+  const childId=type==='y'?`mw-${prefix}-${year}`:`dw-${prefix}-${year}-${month}`;
+  tog.onclick=()=>{const el=document.getElementById(childId);const o=el.style.display==='none';el.style.display=o?'':'none';tog.textContent=o?'−':'+';};
+  let cbId,cbCls,cbCh,lblTxt,lblCls;
+  if(type==='y'){cbId=`${prefix}_y_${year}`;cbCls=`${prefix}_ycb`;cbCh=()=>{const c=document.getElementById(cbId);onYearChange(prefix,year,c.checked);};lblTxt=year;lblCls='tlbl lbl-y';}
+  else{cbId=`${prefix}_m_${year}_${month}`;cbCls=`${prefix}_mcb`;cbCh=()=>{const c=document.getElementById(cbId);onMonthChange(prefix,year,month,c.checked);};lblTxt=MESES[parseInt(month)-1];lblCls='tlbl lbl-m';}
+  const cb=mkCb(cbId,cbCls,true,cbCh);if(month)cb.dataset.month=month;cb.dataset.year=year;
+  const lbl=document.createElement('label');lbl.htmlFor=cbId;lbl.className=lblCls;lbl.textContent=lblTxt;
+  row.append(tog,cb,lbl);return row;
+}
+function onYearChange(prefix,year,checked){
+  qAll(`.${prefix}_mcb[data-year="${year}"],.${prefix}_day[data-year="${year}"]`).forEach(c=>c.checked=checked);
+  updateSATree(prefix);
+}
+function onMonthChange(prefix,year,month,checked){
+  qAll(`.${prefix}_day[data-year="${year}"][data-month="${month}"]`).forEach(c=>c.checked=checked);
+  const yc=document.getElementById(`${prefix}_y_${year}`);
+  if(yc)yc.checked=qAll(`.${prefix}_day[data-year="${year}"]`).every(c=>c.checked);
+  updateSATree(prefix);
+}
+function onDayChange(prefix,year,month){
+  const md=qAll(`.${prefix}_day[data-year="${year}"][data-month="${month}"]`);
+  const mc=document.getElementById(`${prefix}_m_${year}_${month}`);if(mc)mc.checked=md.every(c=>c.checked);
+  const yd=qAll(`.${prefix}_day[data-year="${year}"]`);
+  const yc=document.getElementById(`${prefix}_y_${year}`);if(yc)yc.checked=yd.every(c=>c.checked);
+  updateSATree(prefix);
+}
+function updateSATree(prefix){
+  const all=qAll(`.${prefix}_day`);const sa=document.getElementById(`${prefix}_all`);
+  if(sa)sa.checked=all.length>0&&all.every(c=>c.checked);
+}
+function selectAllTree(prefix,val){
+  qAll(`.${prefix}_day,.${prefix}_mcb,.${prefix}_ycb`).forEach(c=>c.checked=val);
+  const sa=document.getElementById(`${prefix}_all`);if(sa)sa.checked=val;
+}
+function filterTree(prefix,q){
+  q=q.trim().toLowerCase();const map=treeMap[prefix];if(!map)return;
+  for(const y of Object.keys(map)){
+    const ym=y.includes(q);let am=false;
+    for(const m of Object.keys(map[y])){
+      const mn=MESES[parseInt(m)-1].toLowerCase();const mm=ym||mn.includes(q)||m.includes(q);let ad=false;
+      for(const d of map[y][m]){
+        const show=!q||mm||d===q||`${y}-${m}-${d}`.includes(q);
+        const dr=document.getElementById(`${prefix}_d_${y}_${m}_${d}`)?.closest('.tree-row');
+        if(dr)dr.style.display=show?'':'none';if(show)ad=true;
+      }
+      const sm=!q||mm||ad;
+      const mr=document.getElementById(`${prefix}_m_${y}_${m}`)?.closest('.tree-row');
+      const dw=document.getElementById(`dw-${prefix}-${y}-${m}`);
+      if(mr)mr.style.display=sm?'':'none';if(dw)dw.style.display=(sm&&q)?'':'none';if(sm)am=true;
+    }
+    const sy=!q||ym||am;
+    const yr=document.getElementById(`${prefix}_y_${y}`)?.closest('.tree-row');
+    const mw=document.getElementById(`mw-${prefix}-${y}`);
+    if(yr)yr.style.display=sy?'':'none';if(mw)mw.style.display=(sy&&q)?'':'none';
+  }
+}
+
+// ── GET SELECTED ──────────────────────────────────────────────────────────────
+function getSelDates(p){return new Set(qAll(`.${p}_day:checked`).map(c=>c.dataset.date));}
+function getSelChk(cls){return new Set(qAll('.'+cls+':checked').map(c=>c.value));}
+function qAll(s){return[...document.querySelectorAll(s)];}
+
+// ── PROCESS ───────────────────────────────────────────────────────────────────
+function setProgress(pct,msg){document.getElementById('progBar').style.width=pct+'%';document.getElementById('statusMsg').textContent=msg;}
+
+function processData(){
+  document.getElementById('progressWrap').style.display='';
+  document.getElementById('btnProcess').disabled=true;
+  document.getElementById('btnDownload').style.display='none';
+  document.getElementById('kpiRow').style.display='none';
+  document.getElementById('tableWrap').style.display='none';
+  setProgress(5,'Aplicando filtros…');
+  setTimeout(()=>{
+    const selIni=getSelDates('ini'),selFin=getSelDates('fin');
+    const selOri=getSelChk('chk-origen');
+    const selTiFac=getSelChk('chk-tifac');
+    const selTiCupo=getSelChk('chk-ticupo');
+    const selNroVenc=getSelChk('chk-nrovenc');
+    const selLinea=getSelChk('chk-linea');
+
+    const filtered=rawData.filter(r=>{
+      const i=toYMD(parseDate(r['Fecha Vencimiento Inicial']));
+      const f=toYMD(parseDate(r['Fecha Vencimiento Final']));
+      const ori=r['Origen Factura']?r['Origen Factura'].toString().trim():'(Sin Origen)';
+      const tif=r['Tienda Factura']?r['Tienda Factura'].toString().trim():'';
+      const tic=r['Tienda Cupo']?r['Tienda Cupo'].toString().trim():'';
+      const _nvr=r['Nro Vencimiento Final'];const _nvp=(_nvr!==null&&_nvr!==undefined&&_nvr!=='')?Math.round(Number(_nvr)):NaN;const nv=isNaN(_nvp)?'':String(_nvp);
+      const lin=r['Línea Producto']?r['Línea Producto'].toString().trim():'';
+      return (!i||selIni.has(i))&&(!f||selFin.has(f))
+        &&selOri.has(ori)
+        &&(!tif||selTiFac.has(tif))
+        &&(!tic||selTiCupo.has(tic))
+        &&(!nv||selNroVenc.has(nv))
+        &&(!lin||selLinea.has(lin));
+    });
+
+    setProgress(60,'Generando listado de ventas… ('+filtered.length.toLocaleString()+' filas)');
+    setTimeout(()=>{
+      // Un registro por venta/factura (NO se agrupa por cliente)
+      const result=filtered.map(r=>{
+        const cal_m=r['Calificación Cliente Mensual']||'';
+        const cal_d=r['Calificación Cliente Diaria']||'';
+        const concat=`${cal_m}.${cal_d}`;
+        let cat='Sin Clasificar';
+        if(MANTIENE.has(concat))cat='Mantiene';
+        else if(EMPEORA.has(concat))cat='Empeora';
+        else if(MEJORA.has(concat))cat='Mejora';
+        const fv=parseDate(r['Fecha Vencimiento Final']);
+        const _nvr=r['Nro Vencimiento Final'];
+        const _nvp=(_nvr!==null&&_nvr!==undefined&&_nvr!=='')?Math.round(Number(_nvr)):NaN;
+        return {
+          'Nombre del Cliente':r['Nombre Cliente']||'',
+          'Número de Identificación':r['Nro Identificación']||'',
+          'Dirección Principal':r['Dirección Principal']||'',
+          'Teléfono Celular':r['Telefono Celular']||'',
+          'Zona del Cliente Final':r['Zona Cliente Final']||'',
+          'Nombre del Cobrador Actual':r['Nombre Cobrador Actual']||'',
+          'Calificación Cliente Mensual':cal_m,
+          'Calificación Cliente Diaria':cal_d,
+          'Fecha de Vencimiento Final':fv?toDMY(fv):'',
+          'Número de Vencimiento':isNaN(_nvp)?'':_nvp,
+          'Producto':r['Línea Producto']||'',
+          'Vendedor':r['Nombre Vendedor']||'',
+          'Saldo Cuota':+((parseFloat(r['Saldo Cuota'])||0).toFixed(2)),
+          'Saldo Crédito Final':+((parseFloat(r['Saldo Crédito Final'])||0).toFixed(2)),
+          'Valor Cuota':+((parseFloat(r['Valor Cuota'])||0).toFixed(2)),
+          'Calificación Concatenada':concat,
+          'Categoría del Cliente':cat
+        };
+      });
+      processedData=result;
+      setProgress(95,'Renderizando…');
+      setTimeout(()=>{
+        const tots={Mantiene:0,Empeora:0,Mejora:0,'Sin Clasificar':0};
+        result.forEach(r=>tots[r['Categoría del Cliente']]++);
+        document.getElementById('kTotal').textContent=result.length.toLocaleString();
+        document.getElementById('kMan').textContent=tots.Mantiene.toLocaleString();
+        document.getElementById('kEmp').textContent=tots.Empeora.toLocaleString();
+        document.getElementById('kMej').textContent=tots.Mejora.toLocaleString();
+        document.getElementById('kpiRow').style.display='flex';
+        renderTable(result.slice(0,50));
+        document.getElementById('tableWrap').style.display='';
+        document.getElementById('btnDownload').style.display='';
+        document.getElementById('btnProcess').disabled=false;
+        setProgress(100,'✅ Completado · '+result.length.toLocaleString()+' registros');
+      },100);
+    },100);
+  },100);
+}
+
+// ── TABLE PREVIEW ─────────────────────────────────────────────────────────────
+function renderTable(data){
+  const cols=['Nombre','Identificación','Dirección','Teléfono','Zona','Cobrador','Cal.M','Cal.D','Fecha Venc.','Nro Venc.','Producto','Vendedor','Saldo Cuota','Saldo Crédito','Valor Cuota','Calif.','Categoría'];
+  document.querySelector('#prevTable thead').innerHTML='<tr>'+cols.map(c=>`<th>${c}</th>`).join('')+'</tr>';
+  document.querySelector('#prevTable tbody').innerHTML=data.map(r=>{
+    const cat=r['Categoría del Cliente'];
+    const cls=cat==='Mantiene'?'rm':cat==='Empeora'?'re':cat==='Mejora'?'rj':'';
+    const bc=cat==='Mantiene'?'bM':cat==='Empeora'?'bE':cat==='Mejora'?'bJ':'bS';
+    return `<tr class="${cls}">
+      <td>${r['Nombre del Cliente']}</td><td>${r['Número de Identificación']}</td>
+      <td>${r['Dirección Principal']}</td><td>${r['Teléfono Celular']}</td>
+      <td>${r['Zona del Cliente Final']}</td><td>${r['Nombre del Cobrador Actual']}</td>
+      <td style="text-align:center">${r['Calificación Cliente Mensual']}</td>
+      <td style="text-align:center">${r['Calificación Cliente Diaria']}</td>
+      <td>${r['Fecha de Vencimiento Final']}</td>
+      <td style="text-align:center">${r['Número de Vencimiento']}</td>
+      <td>${r['Producto']}</td>
+      <td>${r['Vendedor']}</td>
+      <td style="text-align:right">${r['Saldo Cuota'].toFixed(2)}</td>
+      <td style="text-align:right">${r['Saldo Crédito Final'].toFixed(2)}</td>
+      <td style="text-align:right">${r['Valor Cuota'].toFixed(2)}</td>
+      <td style="text-align:center">${r['Calificación Concatenada']}</td>
+      <td><span class="badge ${bc}">${cat}</span></td></tr>`;
+  }).join('');
+}
+
+// ── DOWNLOAD EXCEL WITH COLORS ────────────────────────────────────────────────
+function downloadExcel(){
+  if(!processedData.length)return;
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.json_to_sheet(processedData,{header:OUT_COLS});
+
+  // Column widths
+  ws['!cols']=[38,22,42,16,38,38,12,12,16,14,22,32,14,18,14,14,16].map(w=>({wch:w}));
+
+  // Styles via SheetJS — add fill colors per row
+  const rng=XLSX.utils.decode_range(ws['!ref']);
+  // Header style
+  for(let c=rng.s.c;c<=rng.e.c;c++){
+    const addr=XLSX.utils.encode_cell({r:0,c});
+    if(!ws[addr])continue;
+    ws[addr].s={
+      fill:{patternType:'solid',fgColor:{rgb:'1F4E79'}},
+      font:{bold:true,color:{rgb:'FFFFFF'},name:'Arial',sz:10},
+      alignment:{horizontal:'center',vertical:'center',wrapText:true}
+    };
+  }
+  // Data rows
+  const catCol=OUT_COLS.indexOf('Categoría del Cliente');
+  for(let r=1;r<=rng.e.r;r++){
+    const catCell=ws[XLSX.utils.encode_cell({r,c:catCol})];
+    const cat=catCell?catCell.v:'';
+    const rgb=cat==='Mantiene'?'D6E4F0':cat==='Empeora'?'FADADD':cat==='Mejora'?'D5F5E3':'FFFFFF';
+    for(let c=rng.s.c;c<=rng.e.c;c++){
+      const addr=XLSX.utils.encode_cell({r,c});
+      if(!ws[addr])ws[addr]={t:'z',s:{}};
+      ws[addr].s=ws[addr].s||{};
+      ws[addr].s.fill={patternType:'solid',fgColor:{rgb}};
+      ws[addr].s.font={name:'Arial',sz:9};
+      ws[addr].s.alignment={vertical:'center'};
+    }
+  }
+
+  XLSX.utils.book_append_sheet(wb,ws,'Listado Ventas');
+  const d=new Date();
+  XLSX.writeFile(wb,`LISTADO_VENTAS_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.xlsx`,{bookSST:false,type:'binary',cellStyles:true});
+}
+</script>
+</body>
+</html>
