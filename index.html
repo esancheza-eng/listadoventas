@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Listado Ventas Marcimex</title>
+<title>Listado de Ventas Marcimex</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
@@ -23,22 +22,19 @@
   .card{background:var(--card);border-radius:var(--rad);box-shadow:var(--shd);padding:24px;}
   .card-title{font-size:.95rem;font-weight:700;color:var(--primary);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
   .card-title::before{content:'';width:4px;height:18px;background:var(--primary);border-radius:2px;display:inline-block;}
-  /* Upload */
   #dropzone{border:2.5px dashed var(--pl);border-radius:var(--rad);padding:36px 20px;text-align:center;cursor:pointer;transition:.2s;background:var(--accent);}
   #dropzone:hover,#dropzone.drag{border-color:var(--primary);background:#d4eaf8;}
   #dropzone .icon{font-size:2.5rem;margin-bottom:10px;}
   #dropzone p{color:var(--mut);font-size:.9rem;}
   #dropzone strong{color:var(--primary);font-size:1rem;}
   #fileInput{display:none;}
-  /* Filters */
   .filters-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
   .filters-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:20px;}
   @media(max-width:900px){.filters-grid-4{grid-template-columns:1fr 1fr;}}
-  @media(max-width:600px){.filters-grid{grid-template-columns:1fr;}.filters-grid-4{grid-template-columns:1fr;}}
+  @media(max-width:600px){.filters-grid{grid-template-columns:1fr;}.filters-grid-4{grid-template-columns:1fr;}main{padding:0 12px;}header{padding:16px;}}
   .filter-block{background:#f7fafc;border:1px solid var(--bdr);border-radius:8px;padding:14px;}
   .filter-label{font-size:.76rem;font-weight:700;color:var(--primary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
   .lnk{font-size:.68rem;font-weight:400;color:var(--pl);cursor:pointer;text-decoration:underline;text-transform:none;letter-spacing:0;}
-  /* Checklist */
   .chk-list{max-height:180px;overflow-y:auto;border:1px solid var(--bdr);border-radius:6px;background:#fff;padding:4px 0;}
   .chk-search{width:100%;border:1px solid var(--bdr);border-radius:5px;padding:5px 8px;font-size:.78rem;margin-bottom:6px;outline:none;}
   .chk-search:focus{border-color:var(--pl);}
@@ -46,7 +42,6 @@
   .chk-item:hover{background:#e8f4fd;}
   .chk-item input{accent-color:var(--primary);cursor:pointer;width:13px;height:13px;flex-shrink:0;}
   .chk-sa{border-bottom:1px solid #e2e8f0;font-weight:600;color:var(--primary);}
-  /* Date tree */
   .tree-search{width:100%;border:1px solid var(--bdr);border-radius:5px;padding:5px 8px;font-size:.78rem;margin-bottom:6px;outline:none;}
   .tree-search:focus{border-color:var(--pl);}
   .date-tree{max-height:220px;overflow-y:auto;border:1px solid var(--bdr);border-radius:6px;background:#fff;padding:4px 0;}
@@ -62,22 +57,18 @@
   .lbl-d{color:#374151;}
   .sa-row{display:flex;align-items:center;gap:5px;padding:3px 8px;border-bottom:1px solid #e2e8f0;margin-bottom:2px;}
   .sa-row label{font-size:.79rem;font-weight:600;color:var(--primary);cursor:pointer;}
-  /* KPIs */
   .kpis{display:flex;gap:12px;flex-wrap:wrap;}
   .kpi{flex:1;min-width:130px;border-radius:8px;padding:14px 18px;color:#fff;text-align:center;}
-  .kpi.tot{background:var(--primary);} .kpi.man{background:var(--man);} .kpi.emp{background:var(--emp);} .kpi.mej{background:var(--mej);}
+  .kpi.tot{background:var(--primary);} .kpi.man{background:var(--man);} .kpi.emp{background:var(--emp);} .kpi.mej{background:var(--mej);} .kpi.sin{background:#888;}
   .kpi .num{font-size:1.7rem;font-weight:800;} .kpi .lbl{font-size:.72rem;opacity:.9;margin-top:2px;}
-  /* Buttons */
   .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border:none;border-radius:8px;font-size:.9rem;font-weight:700;cursor:pointer;transition:.2s;}
   .btn-p{background:var(--primary);color:#fff;} .btn-p:hover{background:var(--pl);} .btn-p:disabled{opacity:.5;cursor:not-allowed;}
   .btn-s{background:#27AE60;color:#fff;} .btn-s:hover{background:#219653;}
   .btn-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
-  /* Progress */
   #progressWrap{display:none;}
   .pb-bg{background:#e2e8f0;border-radius:99px;height:10px;overflow:hidden;margin-top:8px;}
   .pb{height:100%;background:linear-gradient(90deg,var(--primary),var(--pl));border-radius:99px;width:0%;transition:width .3s;}
   #statusMsg{font-size:.82rem;color:var(--mut);margin-top:6px;}
-  /* Table */
   .tbl-wrap{overflow-x:auto;max-height:420px;border-radius:8px;border:1px solid var(--bdr);}
   table{border-collapse:collapse;width:100%;font-size:.77rem;}
   thead th{background:var(--primary);color:#fff;padding:7px 9px;text-align:left;white-space:nowrap;position:sticky;top:0;z-index:2;}
@@ -86,23 +77,21 @@
   .rm{background:#d6e4f0!important;} .re{background:#fadadd!important;} .rj{background:#d5f5e3!important;}
   .badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.69rem;font-weight:700;color:#fff;}
   .bM{background:var(--man);} .bE{background:var(--emp);} .bJ{background:var(--mej);} .bS{background:#999;}
-  /* Divider */
-  .sec-div{border-top:1px solid var(--bdr);margin:18px 0 14px;padding-top:14px;font-size:.78rem;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo">📊</div>
+  <div class="logo">🧾</div>
   <div>
-    <h1>Listado Ventas Marcimex</h1>
-    <p>Carga tu archivo Excel · Aplica filtros · Descarga el resultado</p>
+    <h1>Listado de Ventas · Rodamiento por Cliente</h1>
+    <p>Corte: <span id="lblCorte">--/--/----</span> vs Fecha Vencimiento Final más antigua · mismas fórmulas del Listado Rodamiento</p>
   </div>
 </header>
 <main>
 
   <!-- 1. UPLOAD -->
   <div class="card">
-    <div class="card-title">1 · Subir Archivo Excel</div>
+    <div class="card-title">1 · Subir Archivo Excel (Detalle por Clientes)</div>
     <div id="dropzone" onclick="document.getElementById('fileInput').click()"
          ondragover="ev(event,'drag')" ondragleave="ev(event,'')" ondrop="drop(event)">
       <div class="icon">📂</div>
@@ -110,13 +99,17 @@
       <p style="margin-top:6px;">Formatos soportados: .xlsx · .xls</p>
     </div>
     <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="loadFile(this.files[0])"/>
+    <div class="btn-row" style="margin-top:14px;">
+      <label style="font-size:.85rem;font-weight:700;color:var(--primary);">👥 Equipo de cobradores
+        <select id="selEquipo" class="chk-search" style="width:auto;margin:0 0 0 8px;font-size:.85rem;" onchange="cambiarEquipo()"></select>
+      </label>
+      <span id="equipoInfo" style="font-size:.78rem;color:var(--mut);"></span>
+    </div>
   </div>
 
   <!-- 2. FILTERS -->
   <div class="card" id="filtersCard" style="display:none">
     <div class="card-title">2 · Filtros</div>
-
-    <!-- Fechas -->
     <div class="filters-grid">
       <div class="filter-block">
         <div class="filter-label">📅 Fecha Vencimiento Inicial
@@ -136,9 +129,7 @@
       </div>
     </div>
 
-    <!-- Origen + 4 nuevos filtros -->
     <div class="filters-grid-4" style="margin-top:16px;">
-
       <div class="filter-block">
         <div class="filter-label">🏷️ Origen Factura
           <span class="lnk" onclick="saChk('origen',true)">Todo</span>
@@ -147,7 +138,6 @@
         <input class="chk-search" placeholder="🔍 Buscar…" oninput="searchChk('origen',this.value)"/>
         <div class="chk-list" id="chk-origen"></div>
       </div>
-
       <div class="filter-block">
         <div class="filter-label">🏪 Tienda Factura
           <span class="lnk" onclick="saChk('tifac',true)">Todo</span>
@@ -156,7 +146,6 @@
         <input class="chk-search" placeholder="🔍 Buscar…" oninput="searchChk('tifac',this.value)"/>
         <div class="chk-list" id="chk-tifac"></div>
       </div>
-
       <div class="filter-block">
         <div class="filter-label">🏬 Tienda Cupo
           <span class="lnk" onclick="saChk('ticupo',true)">Todo</span>
@@ -165,7 +154,6 @@
         <input class="chk-search" placeholder="🔍 Buscar…" oninput="searchChk('ticupo',this.value)"/>
         <div class="chk-list" id="chk-ticupo"></div>
       </div>
-
       <div class="filter-block">
         <div class="filter-label">🔢 Nro Vencimiento Final
           <span class="lnk" onclick="saChk('nrovenc',true)">Todo</span>
@@ -174,7 +162,22 @@
         <input class="chk-search" placeholder="🔍 Buscar…" oninput="searchChk('nrovenc',this.value)"/>
         <div class="chk-list" id="chk-nrovenc"></div>
       </div>
-
+      <div class="filter-block">
+        <div class="filter-label">📊 Calificación Mensual
+          <span class="lnk" onclick="saChk('calm',true)">Todo</span>
+          <span class="lnk" onclick="saChk('calm',false)">Ninguno</span>
+        </div>
+        <input class="chk-search" placeholder="🔍 Buscar…" oninput="searchChk('calm',this.value)"/>
+        <div class="chk-list" id="chk-calm"></div>
+      </div>
+      <div class="filter-block" style="grid-column:span 3">
+        <div class="filter-label">🧑‍💼 Nombre Vendedor
+          <span class="lnk" onclick="saChk('vend',true)">Todo</span>
+          <span class="lnk" onclick="saChk('vend',false)">Ninguno</span>
+        </div>
+        <input class="chk-search" placeholder="🔍 Buscar…" oninput="searchChk('vend',this.value)"/>
+        <div class="chk-list" id="chk-vend"></div>
+      </div>
       <div class="filter-block" style="grid-column:1/-1">
         <div class="filter-label">📦 Línea Producto
           <span class="lnk" onclick="saChk('linea',true)">Todo</span>
@@ -182,7 +185,6 @@
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:8px;" id="chk-linea"></div>
       </div>
-
     </div>
   </div>
 
@@ -198,121 +200,268 @@
       <div id="statusMsg"></div>
     </div>
     <div class="kpis" id="kpiRow" style="display:none;margin-top:18px;">
-      <div class="kpi tot"><div class="num" id="kTotal">0</div><div class="lbl">Registros Totales</div></div>
+      <div class="kpi tot"><div class="num" id="kTotal">0</div><div class="lbl">Clientes Totales</div></div>
       <div class="kpi man"><div class="num" id="kMan">0</div><div class="lbl">Mantiene</div></div>
-      <div class="kpi emp"><div class="num" id="kEmp">0</div><div class="lbl">Empeora</div></div>
+      <div class="kpi emp"><div class="num" id="kDet">0</div><div class="lbl">Deteriora</div></div>
       <div class="kpi mej"><div class="num" id="kMej">0</div><div class="lbl">Mejora</div></div>
+      <div class="kpi sin"><div class="num" id="kSin">0</div><div class="lbl">Sin Clasificar</div></div>
     </div>
+    <div id="kpiCalif" style="display:none;margin-top:10px;font-size:.82rem;color:#334;"></div>
     <div id="tableWrap" style="display:none;margin-top:18px;">
-      <div style="font-size:.8rem;color:var(--mut);margin-bottom:8px;">Vista previa · primeros 50 registros</div>
+      <div style="font-size:.8rem;color:var(--mut);margin-bottom:8px;">Vista previa · primeros 50 clientes</div>
       <div class="tbl-wrap"><table id="prevTable"><thead></thead><tbody></tbody></table></div>
+    </div>
+    <div id="resumenWrap" style="display:none;margin-top:22px;">
+      <div class="card-title">4 · Resumen de Categoría Rodamiento</div>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <button class="btn btn-p" id="fAgVend" onclick="setAgrupar('vend')">Por Vendedor</button>
+        <button class="btn btn-p" id="fAgCob" onclick="setAgrupar('cob')" style="opacity:.7">Por Cobrador</button>
+        <span style="width:12px"></span>
+        <button class="btn btn-p" id="fVisCli" onclick="setVista('cli')">Nº clientes</button>
+        <button class="btn btn-p" id="fVisSal" onclick="setVista('saldo')" style="opacity:.7">Suma saldo crédito</button>
+        <button class="btn btn-p" id="fVisPct" onclick="setVista('pct')" style="opacity:.7">% del total</button>
+      </div>
+      <div class="tbl-wrap"><table id="resTable"><thead></thead><tbody></tbody></table></div>
     </div>
   </div>
 
 </main>
 <script>
-// ── CONSTANTS ─────────────────────────────────────────────────────────────────
-const MANTIENE=new Set(['A.A','B.B','C.C','D.D','E.E','E1.E1']);
-const EMPEORA =new Set(['AA.A','A.B','B.C','C.D','D.E','E.E1','E1.E2']);
-const MEJORA  =new Set(['AA.AA','A.AA','B.AA','B.A','C.AA','C.A','C.B','D.AA','D.A','D.B','D.C',
-  'E.AA','E.A','E.B','E.C','E.D','E1.AA','E1.A','E1.B','E1.C','E1.D','E1.E']);
+// ── CONSTANTES (idénticas al Listado Rodamiento) ─────────────────────────────
 const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto',
              'septiembre','octubre','noviembre','diciembre'];
+const _HOY_LOCAL=new Date();
+// Fecha de corte automática: último día del mes actual.
+const FECHA_CORTE_UTC=Date.UTC(_HOY_LOCAL.getFullYear(),_HOY_LOCAL.getMonth()+1,0);
+const COBRADORES_PERMITIDOS=[
+  'VILLARREAL NAVARRETE FAUSTO ALBERTO','MOSQUERA MEDINA HECTOR DANIEL','BRYAN EDUARDO PAREDES PERALTA',
+  'AVILES ABAD JORDY ALEXANDER','AGUILAR CONTRERAS BYRON LUIS','ORTEGA URGILES CELIO ISAIAS',
+  'OLAYA ACURIO JOSE GABRIEL','GUILLERMO MONTANO LUIS AGUSTIN','CARRANZA JIMENEZ FRANKLIN GEOVANNY',
+  'MILLAN CARVAJAL RAFAEL ENRIQUE','GONZALEZ CORTEZ ADOLFO MODESTO','CHAVEZ GOMEZCUELLO MARIO JAVIER',
+  'MENDOZA JIMENEZ VICTOR DARIO','JARA LLIGUIN JULIO LEONARDO'
+];
+function claveCobrador(v){
+  return String(v??'').normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase()
+    .replace(/[^A-Z ]/g,' ').split(/\s+/).filter(Boolean).sort().join(' ');
+}
+const EQUIPOS=[
+  {id:'MILAGRO',nombre:'Zona Milagro',lista:COBRADORES_PERMITIDOS},
+  {id:'TODOS',nombre:'Todos los cobradores del archivo',lista:null}
+];
+EQUIPOS.forEach(e=>{e.keys=e.lista?new Map(e.lista.map(n=>[claveCobrador(n),n])):null;});
+// Clave propia de esta página (no toca las del Listado Rodamiento)
+const LS_EQUIPO='ventasEquipo';
+function equipoActual(){
+  const el=document.getElementById('selEquipo');
+  return EQUIPOS.find(e=>e.id===(el&&el.value))||EQUIPOS[0];
+}
+function initEquipos(){
+  const el=document.getElementById('selEquipo');if(!el)return;
+  el.innerHTML=EQUIPOS.map(e=>`<option value="${e.id}">${e.nombre}${e.lista?` (${e.lista.length} cobradores)`:''}</option>`).join('');
+  let g=null;try{g=localStorage.getItem(LS_EQUIPO);}catch(e){}
+  if(g&&EQUIPOS.some(e=>e.id===g))el.value=g;
+}
+function cambiarEquipo(){
+  try{localStorage.setItem(LS_EQUIPO,equipoActual().id);}catch(e){}
+  document.getElementById('equipoInfo').textContent='';
+  if(rawData.length&&processedData.length)
+    document.getElementById('statusMsg').textContent='Cambiaste de equipo: presiona "Procesar Datos" otra vez.';
+}
+function detectarEquipo(rows){
+  const keys=new Set(rows.map(r=>claveCobrador(r['Nombre Cobrador Actual'])).filter(Boolean));
+  let mejor=null,mejorN=0;
+  EQUIPOS.filter(e=>e.keys).forEach(e=>{
+    const n=[...e.keys.keys()].filter(k=>keys.has(k)).length;
+    if(n>mejorN){mejor=e;mejorN=n;}
+  });
+  const eq=mejor||EQUIPOS.find(e=>!e.keys);
+  const el=document.getElementById('selEquipo');
+  if(el&&eq){el.value=eq.id;try{localStorage.setItem(LS_EQUIPO,eq.id);}catch(e){}}
+  document.getElementById('equipoInfo').textContent=mejor
+    ?`Detectado: ${mejorN} de ${mejor.lista.length} cobradores de ${mejor.nombre} en el archivo.`
+    :`El archivo no tiene cobradores de Zona Milagro: se muestran sus ${keys.size} cobradores.`;
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const c=new Date(FECHA_CORTE_UTC);
+  document.getElementById('lblCorte').textContent=`${String(c.getUTCDate()).padStart(2,'0')}/${String(c.getUTCMonth()+1).padStart(2,'0')}/${c.getUTCFullYear()}`;
+});
 
-// Output columns in required order (NO Cod Cliente) — un registro por venta/factura
+// ── FÓRMULAS DE RODAMIENTO (idénticas al Listado Rodamiento) ─────────────────
+function ymdParts(d){return {y:d.getUTCFullYear(),m:d.getUTCMonth(),day:d.getUTCDate()};}
+function diasHoy(d){
+  if(!d)return '';
+  const p=ymdParts(d);
+  return Math.floor((FECHA_CORTE_UTC-Date.UTC(p.y,p.m,p.day))/86400000);
+}
+function normCalif(v){
+  if(v===null||v===undefined)return '';
+  return String(v).trim().toUpperCase().replace(/\s+/g,'');
+}
+function califRealAfectacion(dias){
+  if(dias===''||dias===null||dias===undefined)return '';
+  const n=Number(dias);
+  if(isNaN(n)||n<=0)return 'AA';
+  if(n<=30)return 'A';
+  if(n<=60)return 'B';
+  if(n<=90)return 'C';
+  if(n<=120)return 'D';
+  if(n<=150)return 'E';
+  if(n<=180)return 'E1';
+  return 'E2';
+}
+const RANK_CAL={AA:0,A:1,B:2,C:3,D:4,E:5,E1:6,E2:7};
+// Regla propia del Listado de Ventas para clientes con Calificación Mensual AA (0 días):
+// se mide con la Calificación Diaria. Si sigue en AA (pagó a tiempo) → Mejora;
+// si pasó a A (1-30) o peor (no pagó en la fecha de vencimiento) → Deteriora.
+// El resto de calificaciones usa la misma fórmula del Listado Rodamiento.
+function categoriaRodamientoVentas(mensual,diaria,rod){
+  const m=normCalif(mensual),d=normCalif(diaria);
+  if(m==='AA'){
+    if(!d||!(d in RANK_CAL))return 'Sin Clasificar';
+    return d==='AA'?'Mejora':'Deteriora';
+  }
+  return categoriaRodamiento(mensual,rod);
+}
+function categoriaRodamiento(inicial,rod){
+  const a=normCalif(inicial),b=normCalif(rod);
+  if(!a||!b||!(a in RANK_CAL)||!(b in RANK_CAL))return 'Sin Clasificar';
+  if(RANK_CAL[b]===RANK_CAL[a])return 'Mantiene';
+  if(RANK_CAL[b]>RANK_CAL[a])return 'Deteriora';
+  return 'Mejora';
+}
+
+// Columnas de salida
 const OUT_COLS=[
   'Nombre del Cliente','Número de Identificación','Dirección Principal','Teléfono Celular',
   'Zona del Cliente Final','Nombre del Cobrador Actual',
-  'Calificación Cliente Mensual','Calificación Cliente Diaria',
-  'Fecha de Vencimiento Final','Número de Vencimiento','Producto','Vendedor',
-  'Saldo Cuota','Saldo Crédito Final','Valor Cuota',
-  'Calificación Concatenada','Categoría del Cliente'
+  'Calificación Cliente Mensual','Calificación Cliente Diaria','HOY','Calificación Real Afectación',
+  'Fecha de Vencimiento Inicial','Fecha de Vencimiento Final Más Antigua','Día Venc. Final','Mes Venc. Final','Año Venc. Final',
+  'Suma Saldo Cuota (Fecha Antigua)','Suma Saldo Crédito Final Total','Suma Valor Cuota Total',
+  'Categoría Cliente Rodamiento',
+  'Tienda Factura','Tienda Cupo','Nro Vencimiento Final','Origen Factura','Línea Producto','Nombre Vendedor'
 ];
+const COL_W=[38,22,42,16,38,38,12,12,10,16,18,22,8,8,8,18,18,18,22,30,30,14,30,22,38];
 
 let rawData=[],processedData=[],treeMap={};
 
-// ── DRAG DROP ─────────────────────────────────────────────────────────────────
+// ── DRAG DROP ────────────────────────────────────────────────────────────────
 function ev(e,c){e.preventDefault();document.getElementById('dropzone').className=c;}
 function drop(e){e.preventDefault();ev(e,'');const f=e.dataTransfer.files[0];if(f)loadFile(f);}
 
-// ── DATE UTILS ────────────────────────────────────────────────────────────────
+// ── FECHAS ───────────────────────────────────────────────────────────────────
 function parseDate(v){
   if(v===null||v===undefined||v==='')return null;
-  if(v instanceof Date)return isNaN(v)?null:v;
-  if(typeof v==='number'){const u=(v-25569)*86400000;const d=new Date(u);return isNaN(d)?null:d;}
-  const d=new Date(v);return isNaN(d)?null:d;
+  if(typeof v==='number'&&isFinite(v)){
+    const d=new Date(Date.UTC(1899,11,30)+Math.round(Number(v))*86400000);
+    return isNaN(d)?null:d;
+  }
+  if(typeof v==='string'){
+    const s=v.trim();
+    let m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+    if(m){
+      let day=+m[1],mon=+m[2],y=+m[3];if(y<100)y+=2000;
+      if(day<=12&&mon>12){const t=day;day=mon;mon=t;}
+      return new Date(Date.UTC(y,mon-1,day));
+    }
+    m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(m)return new Date(Date.UTC(+m[1],+m[2]-1,+m[3]));
+  }
+  if(v instanceof Date){
+    if(isNaN(v))return null;
+    return new Date(v.getTime()+v.getTimezoneOffset()*60000);
+  }
+  return null;
 }
 function toYMD(d){
   if(!d)return null;
-  return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+  const p=ymdParts(d);
+  return `${p.y}-${String(p.m+1).padStart(2,'0')}-${String(p.day).padStart(2,'0')}`;
 }
 function toDMY(d){
   if(!d)return '';
-  return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`;
+  const p=ymdParts(d);
+  return `${String(p.day).padStart(2,'0')}/${String(p.m+1).padStart(2,'0')}/${p.y}`;
 }
+function txt(v){return v===null||v===undefined?'':String(v).trim();}
+function nroVenc(v){
+  if(v===null||v===undefined||v==='')return '';
+  const p=Math.round(Number(v));return isNaN(p)?'':String(p);
+}
+function esc(v){return String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
 
-// ── LOAD FILE ─────────────────────────────────────────────────────────────────
+// ── CARGA DEL ARCHIVO ────────────────────────────────────────────────────────
 function loadFile(file){
   if(!file)return;
   document.getElementById('fileName').textContent='⏳ Cargando '+file.name+'…';
   const reader=new FileReader();
   reader.onload=e=>{
     const wb=XLSX.read(e.target.result,{type:'array',cellDates:false,raw:false});
-    // Also read with cellDates for proper date parsing
     const wb2=XLSX.read(e.target.result,{type:'array',cellDates:true,raw:false});
     const rawD=XLSX.utils.sheet_to_json(wb2.Sheets[wb2.SheetNames[0]],{defval:null});
-    // Merge: use rawD for dates, wb for numbers
     const rawN=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:null});
-    rawData=rawD.map((r,i)=>{const n=rawN[i]||{};return Object.assign({},r,{'Nro Vencimiento Final':n['Nro Vencimiento Final'],'Plazo Crédito':n['Plazo Crédito'],'Saldo Cuota':n['Saldo Cuota'],'Saldo Crédito Final':n['Saldo Crédito Final'],'Valor Cuota':n['Valor Cuota']});});
+    rawData=rawD.map((r,i)=>{
+      const n=rawN[i]||{};
+      return Object.assign({},r,{
+        'Nro Vencimiento Final':n['Nro Vencimiento Final'],
+        'Plazo Crédito':n['Plazo Crédito'],
+        'Saldo Cuota':n['Saldo Cuota'],
+        'Saldo Crédito Final':n['Saldo Crédito Final'],
+        'Valor Cuota':n['Valor Cuota'],
+        'Fecha Vencimiento Inicial':n['Fecha Vencimiento Inicial']!=null&&n['Fecha Vencimiento Inicial']!==''?n['Fecha Vencimiento Inicial']:r['Fecha Vencimiento Inicial'],
+        'Fecha Vencimiento Final':n['Fecha Vencimiento Final']!=null&&n['Fecha Vencimiento Final']!==''?n['Fecha Vencimiento Final']:r['Fecha Vencimiento Final']
+      });
+    });
     document.getElementById('fileName').textContent='✅ '+file.name+' · '+rawData.length.toLocaleString()+' filas';
+    detectarEquipo(rawData);
     buildFilters();
     ['filtersCard','processCard'].forEach(id=>document.getElementById(id).style.display='');
-    document.getElementById('btnDownload').style.display='none';
-    document.getElementById('kpiRow').style.display='none';
-    document.getElementById('tableWrap').style.display='none';
+    ['btnDownload'].forEach(id=>document.getElementById(id).style.display='none');
+    ['kpiRow','kpiCalif','tableWrap','resumenWrap'].forEach(id=>document.getElementById(id).style.display='none');
     processedData=[];
   };
   reader.readAsArrayBuffer(file);
 }
 
-// ── BUILD FILTERS ─────────────────────────────────────────────────────────────
+// ── FILTROS ──────────────────────────────────────────────────────────────────
 function buildFilters(){
-  const sets={ini:new Set(),fin:new Set(),origen:new Set(),tifac:new Set(),ticupo:new Set(),nrovenc:new Set(),linea:new Set()};
+  const sets={ini:new Set(),fin:new Set(),origen:new Set(),tifac:new Set(),ticupo:new Set(),nrovenc:new Set(),linea:new Set(),calm:new Set(),vend:new Set()};
   rawData.forEach(r=>{
     const i=toYMD(parseDate(r['Fecha Vencimiento Inicial']));if(i)sets.ini.add(i);
     const f=toYMD(parseDate(r['Fecha Vencimiento Final']));if(f)sets.fin.add(f);
-    if(r['Origen Factura'])sets.origen.add(r['Origen Factura'].toString().trim());else sets.origen.add('(Sin Origen)');
-    if(r['Tienda Factura'])sets.tifac.add(r['Tienda Factura'].toString().trim());
-    if(r['Tienda Cupo'])sets.ticupo.add(r['Tienda Cupo'].toString().trim());
-    const nv=r['Nro Vencimiento Final'];
-    if(nv!==null&&nv!==undefined&&nv!==''){const p=Math.round(Number(nv));if(!isNaN(p))sets.nrovenc.add(String(p));}
-    if(r['Línea Producto'])sets.linea.add(r['Línea Producto'].toString().trim());
+    sets.origen.add(txt(r['Origen Factura'])||'(Sin Origen)');
+    if(txt(r['Tienda Factura']))sets.tifac.add(txt(r['Tienda Factura']));
+    if(txt(r['Tienda Cupo']))sets.ticupo.add(txt(r['Tienda Cupo']));
+    const nv=nroVenc(r['Nro Vencimiento Final']);if(nv)sets.nrovenc.add(nv);
+    if(txt(r['Línea Producto']))sets.linea.add(txt(r['Línea Producto']));
+    sets.calm.add(normCalif(r['Calificación Cliente Mensual'])||'(Sin Calificación)');
+    sets.vend.add(txt(r['Nombre Vendedor'])||'(Sin Vendedor)');
   });
-  // Date trees
-  treeMap.ini=buildDateMap(sets.ini); renderTree('ini');
-  treeMap.fin=buildDateMap(sets.fin); renderTree('fin');
-  // Checklists
+  treeMap.ini=buildDateMap(sets.ini);renderTree('ini');
+  treeMap.fin=buildDateMap(sets.fin);renderTree('fin');
   buildChk('origen',[...sets.origen].sort());
   buildChk('tifac',[...sets.tifac].sort());
   buildChk('ticupo',[...sets.ticupo].sort());
   buildChk('nrovenc',[...sets.nrovenc].sort((a,b)=>+a-+b));
+  const calOrder=['AA','A','B','C','D','E','E1','E2'];
+  buildChk('calm',[...sets.calm].sort((a,b)=>{
+    const ia=calOrder.indexOf(a),ib=calOrder.indexOf(b);
+    if(ia>=0&&ib>=0)return ia-ib;if(ia>=0)return -1;if(ib>=0)return 1;return a.localeCompare(b);
+  }));
+  buildChk('vend',[...sets.vend].sort());
   buildLineaChk([...sets.linea].sort());
 }
-
-// ── CHECKLIST BUILDER ─────────────────────────────────────────────────────────
 function buildChk(key,vals){
   const wrap=document.getElementById('chk-'+key);wrap.innerHTML='';
-  // Select all row
   const saDiv=document.createElement('div');saDiv.className='chk-item chk-sa';
   const saCb=document.createElement('input');saCb.type='checkbox';saCb.checked=true;saCb.id='sa-'+key;
   saCb.onchange=()=>saChk(key,saCb.checked);
   const saLbl=document.createElement('label');saLbl.htmlFor='sa-'+key;saLbl.textContent='(Seleccionar todo)';saLbl.style.cursor='pointer';
   saDiv.append(saCb,saLbl);wrap.appendChild(saDiv);
-  vals.forEach(v=>{
+  vals.forEach((v,ix)=>{
     const div=document.createElement('div');div.className='chk-item';div.dataset.val=v.toLowerCase();
-    const cb=document.createElement('input');cb.type='checkbox';cb.checked=true;cb.className='chk-'+key;cb.value=v;cb.id=`chk-${key}-${v}`;
+    const cb=document.createElement('input');cb.type='checkbox';cb.checked=true;cb.className='chk-'+key;cb.value=v;cb.id=`chk-${key}-${ix}`;
     cb.onchange=()=>updateSaChk(key);
-    const lbl=document.createElement('label');lbl.htmlFor=`chk-${key}-${v}`;lbl.textContent=v;lbl.style.cursor='pointer';
+    const lbl=document.createElement('label');lbl.htmlFor=cb.id;lbl.textContent=v;lbl.style.cursor='pointer';
     div.append(cb,lbl);wrap.appendChild(div);
   });
 }
@@ -341,8 +490,6 @@ function searchChk(key,q){
     div.style.display=(!q||div.dataset.val.includes(q))?'':'none';
   });
 }
-
-// ── DATE TREE ─────────────────────────────────────────────────────────────────
 function buildDateMap(dateSet){
   const map={};
   for(const ds of dateSet){const[y,m,d]=ds.split('-');if(!map[y])map[y]={};if(!map[y][m])map[y][m]=new Set();map[y][m].add(d);}
@@ -352,16 +499,15 @@ function renderTree(prefix){
   const wrap=document.getElementById('tree'+prefix.charAt(0).toUpperCase()+prefix.slice(1));
   wrap.innerHTML='';const map=treeMap[prefix];
   if(!map||!Object.keys(map).length){wrap.innerHTML='<div style="padding:10px;color:var(--mut);font-size:.78rem;">Sin datos</div>';return;}
-  // Select all
   const saR=document.createElement('div');saR.className='sa-row';
   const saCb=mkCb(`${prefix}_all`,`${prefix}_all`,true,()=>selectAllTree(prefix,saCb.checked));
   const saL=document.createElement('label');saL.htmlFor=`${prefix}_all`;saL.textContent='(Seleccionar todo)';saL.style.cursor='pointer';
   saR.append(saCb,saL);wrap.appendChild(saR);
   for(const y of Object.keys(map).sort((a,b)=>b-a)){
-    wrap.appendChild(mkTreeRow('',`ttog-y-${prefix}-${y}`,'y',prefix,y,null,map));
+    wrap.appendChild(mkTreeRow('',`ttog-y-${prefix}-${y}`,'y',prefix,y,null));
     const mW=document.createElement('div');mW.id=`mw-${prefix}-${y}`;mW.style.display='none';wrap.appendChild(mW);
     for(const m of Object.keys(map[y]).sort((a,b)=>b-a)){
-      mW.appendChild(mkTreeRow('i1',`ttog-m-${prefix}-${y}-${m}`,'m',prefix,y,m,map));
+      mW.appendChild(mkTreeRow('i1',`ttog-m-${prefix}-${y}-${m}`,'m',prefix,y,m));
       const dW=document.createElement('div');dW.id=`dw-${prefix}-${y}-${m}`;dW.style.display='none';mW.appendChild(dW);
       for(const d of [...map[y][m]].sort((a,b)=>+a-+b)){
         const dR=document.createElement('div');dR.className='tree-row i2';
@@ -436,167 +582,250 @@ function filterTree(prefix,q){
     if(yr)yr.style.display=sy?'':'none';if(mw)mw.style.display=(sy&&q)?'':'none';
   }
 }
-
-// ── GET SELECTED ──────────────────────────────────────────────────────────────
-function getSelDates(p){return new Set(qAll(`.${p}_day:checked`).map(c=>c.dataset.date));}
+function getSelDates(p){
+  const sa=document.getElementById(`${p}_all`);
+  if(sa&&sa.checked)return null;
+  return new Set(qAll(`.${p}_day:checked`).map(c=>c.dataset.date));
+}
 function getSelChk(cls){return new Set(qAll('.'+cls+':checked').map(c=>c.value));}
 function qAll(s){return[...document.querySelectorAll(s)];}
 
-// ── PROCESS ───────────────────────────────────────────────────────────────────
+// ── PROCESO ──────────────────────────────────────────────────────────────────
 function setProgress(pct,msg){document.getElementById('progBar').style.width=pct+'%';document.getElementById('statusMsg').textContent=msg;}
-
+// Valores distintos de un campo en los créditos del cliente, empezando por el crédito con vencimiento más antiguo.
+function distintos(rows,fn){
+  const s=[];rows.forEach(r=>{const v=fn(r);if(v&&!s.includes(v))s.push(v);});return s.join(' | ');
+}
+function procesar(rows,sel,eq){
+  const cobEncontrados=new Set();
+  const filtered=rows.filter(r=>{
+    const kc=claveCobrador(r['Nombre Cobrador Actual']);
+    if(eq.keys&&!eq.keys.has(kc))return false;
+    if(kc)cobEncontrados.add(kc);
+    const i=toYMD(parseDate(r['Fecha Vencimiento Inicial']));
+    const f=toYMD(parseDate(r['Fecha Vencimiento Final']));
+    const ori=txt(r['Origen Factura'])||'(Sin Origen)';
+    const tif=txt(r['Tienda Factura']);
+    const tic=txt(r['Tienda Cupo']);
+    const nv=nroVenc(r['Nro Vencimiento Final']);
+    const lin=txt(r['Línea Producto']);
+    const cm=normCalif(r['Calificación Cliente Mensual'])||'(Sin Calificación)';
+    const ven=txt(r['Nombre Vendedor'])||'(Sin Vendedor)';
+    return (!sel.ini||!i||sel.ini.has(i))
+      &&(!sel.fin||!f||sel.fin.has(f))
+      &&sel.ori.has(ori)
+      &&(!tif||sel.tif.has(tif))
+      &&(!tic||sel.tic.has(tic))
+      &&(!nv||sel.nv.has(nv))
+      &&(!lin||sel.lin.has(lin))
+      &&(!sel.calm.size||sel.calm.has(cm))
+      &&sel.ven.has(ven);
+  });
+  const clients={};
+  filtered.forEach(r=>{
+    const id=r['Cod Cliente'];
+    if(!id||String(id).trim()===''||String(id).toLowerCase()==='total')return;
+    if(!clients[id]){
+      clients[id]={
+        nombre:r['Nombre Cliente']||'',nro_id:r['Nro Identificación']||'',
+        dir:r['Dirección Principal']||'',tel:r['Telefono Celular']||'',
+        zona:r['Zona Cliente Final']||'',cobrador:r['Nombre Cobrador Actual']||'',
+        cal_m:normCalif(r['Calificación Cliente Mensual']),cal_d:normCalif(r['Calificación Cliente Diaria']),
+        min_fecha:null,min_fecha_ini:null,rows:[]
+      };
+    }
+    const fv=parseDate(r['Fecha Vencimiento Final']);
+    if(fv&&(!clients[id].min_fecha||fv<clients[id].min_fecha))clients[id].min_fecha=fv;
+    const fi=parseDate(r['Fecha Vencimiento Inicial']);
+    if(fi&&(!clients[id].min_fecha_ini||fi<clients[id].min_fecha_ini))clients[id].min_fecha_ini=fi;
+    clients[id].rows.push(r);
+  });
+  const result=[];
+  for(const id in clients){
+    const c=clients[id];
+    let sumaCuota=0,sumaSaldo=0,sumaValor=0;
+    c.rows.forEach(r=>{
+      const fv=parseDate(r['Fecha Vencimiento Final']);
+      if(fv&&c.min_fecha&&fv<=c.min_fecha)sumaCuota+=(parseFloat(r['Saldo Cuota'])||0);
+      sumaSaldo+=(parseFloat(r['Saldo Crédito Final'])||0);
+      sumaValor+=(parseFloat(r['Valor Cuota'])||0);
+    });
+    const calRod=califRealAfectacion(diasHoy(c.min_fecha));
+    const catRod=categoriaRodamientoVentas(c.cal_m,c.cal_d,calRod);
+    const ord=[...c.rows].sort((a,b)=>{
+      const fa=parseDate(a['Fecha Vencimiento Final']),fb=parseDate(b['Fecha Vencimiento Final']);
+      return (fa?fa.getTime():Infinity)-(fb?fb.getTime():Infinity);
+    });
+    const fila={
+      'Nombre del Cliente':c.nombre,
+      'Número de Identificación':c.nro_id,
+      'Dirección Principal':c.dir,
+      'Teléfono Celular':c.tel,
+      'Zona del Cliente Final':c.zona,
+      'Nombre del Cobrador Actual':c.cobrador,
+      'Calificación Cliente Mensual':c.cal_m,
+      'Calificación Cliente Diaria':c.cal_d,
+      'HOY':diasHoy(c.min_fecha),
+      'Calificación Real Afectación':calRod,
+      'Fecha de Vencimiento Inicial':c.min_fecha_ini?toDMY(c.min_fecha_ini):'',
+      'Fecha de Vencimiento Final Más Antigua':c.min_fecha?toDMY(c.min_fecha):'',
+      'Día Venc. Final':c.min_fecha?c.min_fecha.getUTCDate():'',
+      'Mes Venc. Final':c.min_fecha?c.min_fecha.getUTCMonth()+1:'',
+      'Año Venc. Final':c.min_fecha?c.min_fecha.getUTCFullYear():'',
+      'Suma Saldo Cuota (Fecha Antigua)':+sumaCuota.toFixed(2),
+      'Suma Saldo Crédito Final Total':+sumaSaldo.toFixed(2),
+      'Suma Valor Cuota Total':+sumaValor.toFixed(2),
+      'Categoría Cliente Rodamiento':catRod,
+      'Tienda Factura':distintos(ord,r=>txt(r['Tienda Factura'])),
+      'Tienda Cupo':distintos(ord,r=>txt(r['Tienda Cupo'])),
+      'Nro Vencimiento Final':distintos(ord,r=>nroVenc(r['Nro Vencimiento Final'])),
+      'Origen Factura':distintos(ord,r=>txt(r['Origen Factura'])),
+      'Línea Producto':distintos(ord,r=>txt(r['Línea Producto'])),
+      'Nombre Vendedor':distintos(ord,r=>txt(r['Nombre Vendedor']))
+    };
+    // Para los resúmenes: el cliente cuenta una sola vez, con el vendedor del crédito de vencimiento más antiguo.
+    Object.defineProperty(fila,'_vendPrincipal',{value:txt(ord[0]&&ord[0]['Nombre Vendedor'])||'(Sin Vendedor)',enumerable:false});
+    result.push(fila);
+  }
+  const order=['AA','A','B','C','D','E','E1','E2'];
+  result.sort((a,b)=>{
+    const ia=order.indexOf(a['Calificación Cliente Mensual']),ib=order.indexOf(b['Calificación Cliente Mensual']);
+    const sa=ia<0?99:ia,sb=ib<0?99:ib;
+    if(sa!==sb)return sa-sb;
+    return String(a['Nombre del Cliente']).localeCompare(String(b['Nombre del Cliente']));
+  });
+  return {result,filas:filtered.length,cobEncontrados};
+}
 function processData(){
   document.getElementById('progressWrap').style.display='';
   document.getElementById('btnProcess').disabled=true;
-  document.getElementById('btnDownload').style.display='none';
-  document.getElementById('kpiRow').style.display='none';
-  document.getElementById('tableWrap').style.display='none';
-  setProgress(5,'Aplicando filtros…');
+  ['btnDownload'].forEach(id=>document.getElementById(id).style.display='none');
+  ['kpiRow','kpiCalif','tableWrap','resumenWrap'].forEach(id=>document.getElementById(id).style.display='none');
+  setProgress(10,'Aplicando filtros y agrupando por cliente…');
   setTimeout(()=>{
-    const selIni=getSelDates('ini'),selFin=getSelDates('fin');
-    const selOri=getSelChk('chk-origen');
-    const selTiFac=getSelChk('chk-tifac');
-    const selTiCupo=getSelChk('chk-ticupo');
-    const selNroVenc=getSelChk('chk-nrovenc');
-    const selLinea=getSelChk('chk-linea');
-
-    const filtered=rawData.filter(r=>{
-      const i=toYMD(parseDate(r['Fecha Vencimiento Inicial']));
-      const f=toYMD(parseDate(r['Fecha Vencimiento Final']));
-      const ori=r['Origen Factura']?r['Origen Factura'].toString().trim():'(Sin Origen)';
-      const tif=r['Tienda Factura']?r['Tienda Factura'].toString().trim():'';
-      const tic=r['Tienda Cupo']?r['Tienda Cupo'].toString().trim():'';
-      const _nvr=r['Nro Vencimiento Final'];const _nvp=(_nvr!==null&&_nvr!==undefined&&_nvr!=='')?Math.round(Number(_nvr)):NaN;const nv=isNaN(_nvp)?'':String(_nvp);
-      const lin=r['Línea Producto']?r['Línea Producto'].toString().trim():'';
-      return (!i||selIni.has(i))&&(!f||selFin.has(f))
-        &&selOri.has(ori)
-        &&(!tif||selTiFac.has(tif))
-        &&(!tic||selTiCupo.has(tic))
-        &&(!nv||selNroVenc.has(nv))
-        &&(!lin||selLinea.has(lin));
+    const eq=equipoActual();
+    const sel={
+      ini:getSelDates('ini'),fin:getSelDates('fin'),
+      ori:getSelChk('chk-origen'),tif:getSelChk('chk-tifac'),tic:getSelChk('chk-ticupo'),
+      nv:getSelChk('chk-nrovenc'),lin:getSelChk('chk-linea'),calm:getSelChk('chk-calm'),ven:getSelChk('chk-vend')
+    };
+    const {result,filas,cobEncontrados}=procesar(rawData,sel,eq);
+    processedData=result;
+    const tots={Mantiene:0,Deteriora:0,Mejora:0,'Sin Clasificar':0};
+    const byM={};
+    result.forEach(r=>{
+      tots[r['Categoría Cliente Rodamiento']]++;
+      const m=r['Calificación Cliente Mensual']||'(Sin)';byM[m]=(byM[m]||0)+1;
     });
-
-    setProgress(60,'Generando listado de ventas… ('+filtered.length.toLocaleString()+' filas)');
-    setTimeout(()=>{
-      // Un registro por venta/factura (NO se agrupa por cliente)
-      const result=filtered.map(r=>{
-        const cal_m=r['Calificación Cliente Mensual']||'';
-        const cal_d=r['Calificación Cliente Diaria']||'';
-        const concat=`${cal_m}.${cal_d}`;
-        let cat='Sin Clasificar';
-        if(MANTIENE.has(concat))cat='Mantiene';
-        else if(EMPEORA.has(concat))cat='Empeora';
-        else if(MEJORA.has(concat))cat='Mejora';
-        const fv=parseDate(r['Fecha Vencimiento Final']);
-        const _nvr=r['Nro Vencimiento Final'];
-        const _nvp=(_nvr!==null&&_nvr!==undefined&&_nvr!=='')?Math.round(Number(_nvr)):NaN;
-        return {
-          'Nombre del Cliente':r['Nombre Cliente']||'',
-          'Número de Identificación':r['Nro Identificación']||'',
-          'Dirección Principal':r['Dirección Principal']||'',
-          'Teléfono Celular':r['Telefono Celular']||'',
-          'Zona del Cliente Final':r['Zona Cliente Final']||'',
-          'Nombre del Cobrador Actual':r['Nombre Cobrador Actual']||'',
-          'Calificación Cliente Mensual':cal_m,
-          'Calificación Cliente Diaria':cal_d,
-          'Fecha de Vencimiento Final':fv?toDMY(fv):'',
-          'Número de Vencimiento':isNaN(_nvp)?'':_nvp,
-          'Producto':r['Línea Producto']||'',
-          'Vendedor':r['Nombre Vendedor']||'',
-          'Saldo Cuota':+((parseFloat(r['Saldo Cuota'])||0).toFixed(2)),
-          'Saldo Crédito Final':+((parseFloat(r['Saldo Crédito Final'])||0).toFixed(2)),
-          'Valor Cuota':+((parseFloat(r['Valor Cuota'])||0).toFixed(2)),
-          'Calificación Concatenada':concat,
-          'Categoría del Cliente':cat
-        };
-      });
-      processedData=result;
-      setProgress(95,'Renderizando…');
-      setTimeout(()=>{
-        const tots={Mantiene:0,Empeora:0,Mejora:0,'Sin Clasificar':0};
-        result.forEach(r=>tots[r['Categoría del Cliente']]++);
-        document.getElementById('kTotal').textContent=result.length.toLocaleString();
-        document.getElementById('kMan').textContent=tots.Mantiene.toLocaleString();
-        document.getElementById('kEmp').textContent=tots.Empeora.toLocaleString();
-        document.getElementById('kMej').textContent=tots.Mejora.toLocaleString();
-        document.getElementById('kpiRow').style.display='flex';
-        renderTable(result.slice(0,50));
-        document.getElementById('tableWrap').style.display='';
-        document.getElementById('btnDownload').style.display='';
-        document.getElementById('btnProcess').disabled=false;
-        setProgress(100,'✅ Completado · '+result.length.toLocaleString()+' registros');
-      },100);
-    },100);
-  },100);
+    document.getElementById('kTotal').textContent=result.length.toLocaleString();
+    document.getElementById('kMan').textContent=tots.Mantiene.toLocaleString();
+    document.getElementById('kDet').textContent=tots.Deteriora.toLocaleString();
+    document.getElementById('kMej').textContent=tots.Mejora.toLocaleString();
+    document.getElementById('kSin').textContent=tots['Sin Clasificar'].toLocaleString();
+    document.getElementById('kpiRow').style.display='flex';
+    const order=['AA','A','B','C','D','E','E1','E2'];
+    const parts=Object.keys(byM).sort((a,b)=>{
+      const ia=order.indexOf(a),ib=order.indexOf(b);
+      if(ia>=0&&ib>=0)return ia-ib;if(ia>=0)return -1;if(ib>=0)return 1;return a.localeCompare(b);
+    }).map(k=>`<b>${esc(k)}</b>: ${byM[k].toLocaleString()}`);
+    const kc=document.getElementById('kpiCalif');kc.style.display='';
+    kc.innerHTML='Calificación mensual en resultado → '+parts.join(' &nbsp;·&nbsp; ');
+    renderTable(result.slice(0,50));
+    document.getElementById('tableWrap').style.display='';
+    renderResumen();
+    document.getElementById('resumenWrap').style.display='';
+    document.getElementById('btnDownload').style.display='';
+    document.getElementById('btnProcess').disabled=false;
+    const faltan=eq.keys?[...eq.keys.keys()].filter(k=>!cobEncontrados.has(k)).map(k=>eq.keys.get(k)):[];
+    setProgress(100,'✅ Completado · '+result.length.toLocaleString()+' clientes ('+filas.toLocaleString()+' créditos) · '
+      +eq.nombre+': '+cobEncontrados.size+(eq.keys?' de '+eq.keys.size:'')+' cobradores'
+      +(faltan.length?` · ⚠️ ${faltan.length} cobrador(es) sin filas: ${faltan.join(', ')}`:''));
+  },60);
 }
 
-// ── TABLE PREVIEW ─────────────────────────────────────────────────────────────
+// ── VISTA PREVIA ─────────────────────────────────────────────────────────────
+function badgeCls(cat){return cat==='Mantiene'?'bM':cat==='Deteriora'?'bE':cat==='Mejora'?'bJ':'bS';}
+function rowCls(cat){return cat==='Mantiene'?'rm':cat==='Deteriora'?'re':cat==='Mejora'?'rj':'';}
 function renderTable(data){
-  const cols=['Nombre','Identificación','Dirección','Teléfono','Zona','Cobrador','Cal.M','Cal.D','Fecha Venc.','Nro Venc.','Producto','Vendedor','Saldo Cuota','Saldo Crédito','Valor Cuota','Calif.','Categoría'];
+  const cols=['Nombre','Identificación','Dirección','Teléfono','Zona','Cobrador','Cal.M','Cal.D','HOY','Cal. Real Afec.','F. Venc. Ini.','F. Venc. Fin.','Día','Mes','Año','Saldo Cuota','Saldo Crédito','Valor Cuota','Cat. Rodamiento','Tienda Factura','Tienda Cupo','Nro Venc. Final','Origen Factura','Línea Producto','Vendedor'];
+  const num=new Set(['Suma Saldo Cuota (Fecha Antigua)','Suma Saldo Crédito Final Total','Suma Valor Cuota Total']);
+  const cen=new Set(['Calificación Cliente Mensual','Calificación Cliente Diaria','HOY','Calificación Real Afectación','Día Venc. Final','Mes Venc. Final','Año Venc. Final','Nro Vencimiento Final']);
   document.querySelector('#prevTable thead').innerHTML='<tr>'+cols.map(c=>`<th>${c}</th>`).join('')+'</tr>';
   document.querySelector('#prevTable tbody').innerHTML=data.map(r=>{
-    const cat=r['Categoría del Cliente'];
-    const cls=cat==='Mantiene'?'rm':cat==='Empeora'?'re':cat==='Mejora'?'rj':'';
-    const bc=cat==='Mantiene'?'bM':cat==='Empeora'?'bE':cat==='Mejora'?'bJ':'bS';
-    return `<tr class="${cls}">
-      <td>${r['Nombre del Cliente']}</td><td>${r['Número de Identificación']}</td>
-      <td>${r['Dirección Principal']}</td><td>${r['Teléfono Celular']}</td>
-      <td>${r['Zona del Cliente Final']}</td><td>${r['Nombre del Cobrador Actual']}</td>
-      <td style="text-align:center">${r['Calificación Cliente Mensual']}</td>
-      <td style="text-align:center">${r['Calificación Cliente Diaria']}</td>
-      <td>${r['Fecha de Vencimiento Final']}</td>
-      <td style="text-align:center">${r['Número de Vencimiento']}</td>
-      <td>${r['Producto']}</td>
-      <td>${r['Vendedor']}</td>
-      <td style="text-align:right">${r['Saldo Cuota'].toFixed(2)}</td>
-      <td style="text-align:right">${r['Saldo Crédito Final'].toFixed(2)}</td>
-      <td style="text-align:right">${r['Valor Cuota'].toFixed(2)}</td>
-      <td style="text-align:center">${r['Calificación Concatenada']}</td>
-      <td><span class="badge ${bc}">${cat}</span></td></tr>`;
+    const cat=r['Categoría Cliente Rodamiento'];
+    return `<tr class="${rowCls(cat)}">`+OUT_COLS.map(k=>{
+      if(k==='Categoría Cliente Rodamiento')return `<td><span class="badge ${badgeCls(cat)}">${esc(cat)}</span></td>`;
+      if(num.has(k))return `<td style="text-align:right">${money(r[k])}</td>`;
+      return `<td${cen.has(k)?' style="text-align:center"':''}>${esc(r[k])}</td>`;
+    }).join('')+'</tr>';
   }).join('');
 }
 
-// ── DOWNLOAD EXCEL WITH COLORS ────────────────────────────────────────────────
+// ── RESUMEN POR VENDEDOR / COBRADOR ──────────────────────────────────────────
+function money(n){return (Number(n)||0).toLocaleString('es-EC',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function pct(part,tot){if(!tot)return '0.0%';return ((part/tot)*100).toFixed(1)+'%';}
+let agrupar='vend',vista='cli';
+const CATS=['Mantiene','Deteriora','Mejora','Sin Clasificar'];
+function emptyCat(){return {n:0,s:0};}
+function buildResumen(data,campo){
+  const map={};
+  data.forEach(r=>{
+    const k=(campo==='_vendPrincipal'?r._vendPrincipal:String(r[campo]||'').trim())||'(Sin dato)';
+    if(!map[k]){map[k]={nombre:k,clientes:0,saldo:0};CATS.forEach(c=>map[k][c]=emptyCat());}
+    const o=map[k],cat=r['Categoría Cliente Rodamiento'],sal=parseFloat(r['Suma Saldo Crédito Final Total'])||0;
+    o.clientes++;o.saldo+=sal;o[cat].n++;o[cat].s+=sal;
+  });
+  const rows=Object.values(map).sort((a,b)=>b.saldo-a.saldo);
+  const tot={nombre:'TOTAL',clientes:0,saldo:0};CATS.forEach(c=>tot[c]=emptyCat());
+  rows.forEach(o=>{tot.clientes+=o.clientes;tot.saldo+=o.saldo;CATS.forEach(c=>{tot[c].n+=o[c].n;tot[c].s+=o[c].s;});});
+  rows.push(tot);
+  return rows;
+}
+function campoAgrupar(){return agrupar==='vend'?'_vendPrincipal':'Nombre del Cobrador Actual';}
+function setAgrupar(v){agrupar=v;document.getElementById('fAgVend').style.opacity=v==='vend'?'1':'.7';document.getElementById('fAgCob').style.opacity=v==='cob'?'1':'.7';renderResumen();}
+function setVista(v){vista=v;[['cli','fVisCli'],['saldo','fVisSal'],['pct','fVisPct']].forEach(([k,id])=>document.getElementById(id).style.opacity=k===v?'1':'.7');renderResumen();}
+function cellCat(o,k){
+  const c=o[k];
+  if(vista==='cli')return c.n.toLocaleString();
+  if(vista==='saldo')return money(c.s);
+  return pct(c.s,o.saldo);
+}
+function renderResumen(){
+  const rows=buildResumen(processedData,campoAgrupar());
+  const cols=[agrupar==='vend'?'Vendedor':'Cobrador Actual','Clientes','Saldo Crédito Total',...CATS];
+  document.querySelector('#resTable thead').innerHTML='<tr>'+cols.map(c=>`<th>${c}</th>`).join('')+'</tr>';
+  document.querySelector('#resTable tbody').innerHTML=rows.map(o=>{
+    const b=o.nombre==='TOTAL'?'font-weight:800;background:#e8f4fd;':'';
+    return `<tr style="${b}"><td>${esc(o.nombre)}</td><td style="text-align:center">${o.clientes.toLocaleString()}</td><td style="text-align:right">${money(o.saldo)}</td>`
+      +CATS.map(k=>`<td style="text-align:center">${cellCat(o,k)}</td>`).join('')+'</tr>';
+  }).join('');
+}
+function resumenHoja(campo,titulo){
+  return buildResumen(processedData,campo).map(o=>{
+    const x={[titulo]:o.nombre,'Clientes':o.clientes,'Saldo Crédito Total':+o.saldo.toFixed(2)};
+    CATS.forEach(k=>{x[k+' Clientes']=o[k].n;x[k+' Saldo']=+o[k].s.toFixed(2);x[k+' % Saldo']=pct(o[k].s,o.saldo);});
+    return x;
+  });
+}
+
+// ── DESCARGA EXCEL ───────────────────────────────────────────────────────────
 function downloadExcel(){
   if(!processedData.length)return;
   const wb=XLSX.utils.book_new();
   const ws=XLSX.utils.json_to_sheet(processedData,{header:OUT_COLS});
-
-  // Column widths
-  ws['!cols']=[38,22,42,16,38,38,12,12,16,14,22,32,14,18,14,14,16].map(w=>({wch:w}));
-
-  // Styles via SheetJS — add fill colors per row
-  const rng=XLSX.utils.decode_range(ws['!ref']);
-  // Header style
-  for(let c=rng.s.c;c<=rng.e.c;c++){
-    const addr=XLSX.utils.encode_cell({r:0,c});
-    if(!ws[addr])continue;
-    ws[addr].s={
-      fill:{patternType:'solid',fgColor:{rgb:'1F4E79'}},
-      font:{bold:true,color:{rgb:'FFFFFF'},name:'Arial',sz:10},
-      alignment:{horizontal:'center',vertical:'center',wrapText:true}
-    };
-  }
-  // Data rows
-  const catCol=OUT_COLS.indexOf('Categoría del Cliente');
-  for(let r=1;r<=rng.e.r;r++){
-    const catCell=ws[XLSX.utils.encode_cell({r,c:catCol})];
-    const cat=catCell?catCell.v:'';
-    const rgb=cat==='Mantiene'?'D6E4F0':cat==='Empeora'?'FADADD':cat==='Mejora'?'D5F5E3':'FFFFFF';
-    for(let c=rng.s.c;c<=rng.e.c;c++){
-      const addr=XLSX.utils.encode_cell({r,c});
-      if(!ws[addr])ws[addr]={t:'z',s:{}};
-      ws[addr].s=ws[addr].s||{};
-      ws[addr].s.fill={patternType:'solid',fgColor:{rgb}};
-      ws[addr].s.font={name:'Arial',sz:9};
-      ws[addr].s.alignment={vertical:'center'};
-    }
-  }
-
+  ws['!cols']=COL_W.map(w=>({wch:w}));
+  ws['!autofilter']={ref:ws['!ref']};
   XLSX.utils.book_append_sheet(wb,ws,'Listado Ventas');
+  const w2=XLSX.utils.json_to_sheet(resumenHoja('_vendPrincipal','Vendedor'));
+  w2['!cols']=[{wch:42},{wch:10},{wch:18}].concat(Array(12).fill({wch:16}));
+  XLSX.utils.book_append_sheet(wb,w2,'Resumen Vendedor');
+  const w3=XLSX.utils.json_to_sheet(resumenHoja('Nombre del Cobrador Actual','Cobrador Actual'));
+  w3['!cols']=[{wch:42},{wch:10},{wch:18}].concat(Array(12).fill({wch:16}));
+  XLSX.utils.book_append_sheet(wb,w3,'Resumen Cobrador');
   const d=new Date();
-  XLSX.writeFile(wb,`LISTADO_VENTAS_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.xlsx`,{bookSST:false,type:'binary',cellStyles:true});
+  XLSX.writeFile(wb,`LISTADO_VENTAS_${equipoActual().id}_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.xlsx`);
 }
+initEquipos();
 </script>
 </body>
 </html>
